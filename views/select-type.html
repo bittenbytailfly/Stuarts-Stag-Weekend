@@ -1,0 +1,38 @@
+﻿<!doctype html>
+<html id="ng-app" ng-app="superheroSelector">
+<head>
+    <meta charset="utf-8" />
+    <link href='http://fonts.googleapis.com/css?family=Bangers' rel='stylesheet' type='text/css'>
+    <title>Stuart's Stag</title>
+    <script src="/js/angular.min.js"></script>
+    <script src="/js/angular-ui-bootstrap.min.js"></script>
+    <script src="/js/controllers.js"></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <!--[if lte IE 7]>
+        <script src="/js/json2.js"></script>
+    <![endif]-->
+    <style>
+        body {
+            font-family: 'Bangers', cursive;
+            font-size: 5em;
+            text-align: center;
+        }
+    </style>
+</head>
+<body ng-controller="selectTypeCtrl">
+    <div class="container">
+        <p>
+            Either die a
+            <a href="/character?type=hero" ng-disabled="heroes">hero</a>
+            or live long enough to see yourself become the
+            <a href="/character?type=villain" ng-disabled="villains">villain</a>.
+            <span>{{test}}</span>
+            <input type="text" ng-model="test" />
+
+        </p>
+        <input type="text" ng-model="yourName" placeholder="Enter a name here">
+        <hr>
+        <h1>Hello {[{yourName}]}!</h1>
+    </div>
+</body>
+</html>
