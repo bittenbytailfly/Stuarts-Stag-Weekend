@@ -1,16 +1,19 @@
-application: stagejcartercom
-version: 1
+application: cardiffcapers
+version: rough-cut-beta
 runtime: python27
 api_version: 1
 threadsafe: yes
 
 handlers:
-- url: /(.*\.(gif|png|jpg|css|js|ico|xml))
+- url: /(.*\.(gif|png|jpg|css|js|ico|xml|html))
   static_files: static/\1
-  upload: static/(.*\.(gif|png|jpg|css|js|ico|xml))
+  upload: static/(.*\.(gif|png|jpg|css|js|ico|xml|html))
+
+- url: /ajax/.*
+  script: controllers.webmethods.app
 
 - url: .*
-  script: main.app
+  script: controllers.main.app
 
 libraries:
 - name: webapp2
