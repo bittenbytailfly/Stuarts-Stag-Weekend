@@ -24,14 +24,18 @@ from models.participantfactory import Participant
 from models.participantfactory import ParticipantFactory
 from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
+from webapp2_extras import routes
 
 class MainHandler(webapp2.RequestHandler):
-    def get(self):
-        userId = self.request.get('id')
-        logging.warning(self.request)
-        participant = ParticipantFactory.GetParticipantById(userId)
+    def get(self, participantKey):
+        participantKey = ndb.Key(urlsafe=p or '')
+        participant = p.get()
+        
+        if participant is None:
+            self.redirect('/')
+        
         path = os.path.join(os.path.dirname(__file__), '../views/select-type.html')
-        self.response.out.write(template.render(path, {'userId': userId}))
+        self.response.out.write(template.render(path, {'participantKey': participantKey}))
 
 class CharacterPageHandler(webapp2.RequestHandler):
     def get(self):
@@ -45,7 +49,10 @@ class PopulateHandler(webapp2.RequestHandler):
        ConstructData.SetupDataStructures()
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler),
-    ('/populate', PopulateHandler),
-    ('/character', CharacterPageHandler)
+    webapp2.Route('/', UnknownUserHandler),
+    webapp2.Route('/populate', PopulateHandler),
+    routes.PathPrefixRoute('/<participantKey>', [
+        webapp2.Route('/', MainHandler),
+        webapp2.Route('/<type:hero|villain>', CharacterPageHandler)
+    ])
 ], debug=True)

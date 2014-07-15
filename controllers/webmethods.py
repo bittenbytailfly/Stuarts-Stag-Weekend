@@ -20,18 +20,9 @@ import json
 import logging
 from models.characterfactory import CharacterFactory
 
-class AvailableTypesHandler(webapp2.RequestHandler):
-    def post(self):
-        #todo get actual availability
-        result = {
-            'heroes': True,
-            'villains': False
-        }
-        self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(json.dumps(result))
-
 class CharacterHandler(webapp2.RequestHandler):
     def post(self):
+        characters = characterViewModel.GetAllCharacters()
         characterType = json.loads(self.request.body)['characterType']
         logging.warning(characterType)
         result = {}
@@ -42,12 +33,17 @@ class CharacterHandler(webapp2.RequestHandler):
 class SelectionHandler(webapp2.RequestHandler):
     def post(self):
         params = json.loads(self.request.body)
-        userId = params['userId']
-        characterId = params['characterId']
-        CharacterFactory.AssociateParticipant(userId, characterId)
+        userKey = params['userKey']
+        participantKey = params['characterKey']
+        
+        character = ndb.Key(urlsafe=characterKey).get()
+        participant = ndb.Key(urlsafe=participantKey).get()
+        
+        if character is not None and participant is not None and participant.characterKey is None and character.get_matching_participant is None:
+            participant.characterKey = character.key;
+            participant.put()
 
 app = webapp2.WSGIApplication([
-    ('/ajax/availableTypes', AvailableTypesHandler),
     ('/ajax/characters', CharacterHandler),
     ('/ajax/select', SelectionHandler)
 ], debug=True)
