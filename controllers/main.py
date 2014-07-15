@@ -28,31 +28,32 @@ from webapp2_extras import routes
 
 class MainHandler(webapp2.RequestHandler):
     def get(self, participantKey):
-        participantKey = ndb.Key(urlsafe=p or '')
-        participant = p.get()
+        participantKey = ndb.Key(urlsafe=participantKey or '')
+        participant = participantKey.get()
         
         if participant is None:
             self.redirect('/')
         
         path = os.path.join(os.path.dirname(__file__), '../views/select-type.html')
-        self.response.out.write(template.render(path, {'participantKey': participantKey}))
+        self.response.out.write(template.render(path, {'participantKey': participantKey.urlsafe()}))
 
 class CharacterPageHandler(webapp2.RequestHandler):
-    def get(self):
-        userId = self.request.get('id')
-        characterType = self.request.get('type')
+    def get(self, participantKey, characterType):
         path = os.path.join(os.path.dirname(__file__), '../views/select-character.html')
-        self.response.out.write(template.render(path, {'userId': userId, 'characterType': characterType}))
+        self.response.out.write(template.render(path, {'participantKey': participantKey, 'characterType': characterType}))
 
 class PopulateHandler(webapp2.RequestHandler):
     def get(self):
-       ConstructData.SetupDataStructures()
+        ConstructData.SetupDataStructures()
+
+class UnknownUserHandler(webapp2.RequestHandler):
+    def get(self):
+        path = os.path.join(os.path.dirname(__file__), '../views/unauthorised.html')
+        self.response.out.write(template.render(path, None))
 
 app = webapp2.WSGIApplication([
-    webapp2.Route('/', UnknownUserHandler),
     webapp2.Route('/populate', PopulateHandler),
-    routes.PathPrefixRoute('/<participantKey>', [
-        webapp2.Route('/', MainHandler),
-        webapp2.Route('/<type:hero|villain>', CharacterPageHandler)
-    ])
+    webapp2.Route('/<participantKey>', MainHandler),
+    webapp2.Route('/<participantKey>/<characterType:hero|villain>', CharacterPageHandler),
+    webapp2.Route('/', UnknownUserHandler)
 ], debug=True)

@@ -20,30 +20,22 @@ import logging
 from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
 
-class Participant(ndb.Model):
-	name = ndb.StringProperty()
-	characterKey = ndb.KeyProperty(kind=CharacterEntity)
-
-    def get_character(self):
-        return self.character.get()
-        
-    @classmethod
-    def get_all_participants_with_characters(cls):
-        return cls.query(Participant.character is not None)
-        
-    @classmethod
-    def get_all_participants(cls):
-        return cls.query()
-    
 class Character(ndb.Model):
     name = ndb.StringProperty()
     type = ndb.StringProperty(choices=['hero', 'villain'])
     theme = ndb.StringProperty()
-    
+
     @classmethod
     def get_all_characters(cls):
         return cls.query()
-    
+
+class Participant(ndb.Model):
+    name = ndb.StringProperty()
+    characterKey = ndb.KeyProperty(kind=Character)
+
+    def get_character(self):
+        return self.characterKey.get()
+
     @classmethod
-    def get_matching_participant(cls):
-        return Participant.query(Participant.characterKey == cls.key)
+    def get_all_participants(cls):
+        return cls.query()

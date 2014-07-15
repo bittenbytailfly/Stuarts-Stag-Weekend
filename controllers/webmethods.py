@@ -18,29 +18,32 @@ import os
 import webapp2
 import json
 import logging
-from models.characterfactory import CharacterFactory
+from models.viewmodels import CharacterViewModel
+from google.appengine.ext import ndb
+
 
 class CharacterHandler(webapp2.RequestHandler):
     def post(self):
-        characters = characterViewModel.GetAllCharacters()
         characterType = json.loads(self.request.body)['characterType']
-        logging.warning(characterType)
-        result = {}
-        characters = CharacterFactory.GetAllCharacters(characterType)
+        characters = CharacterViewModel.GetAllCharacters(characterType)
+        result = []
+        for c in characters:
+            result.append(c.__dict__)
         self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(json.dumps(characters))
+        self.response.out.write(json.dumps(result))
 
 class SelectionHandler(webapp2.RequestHandler):
     def post(self):
         params = json.loads(self.request.body)
-        userKey = params['userKey']
-        participantKey = params['characterKey']
+        participantKey = params['participantKey']
+        characterKey = params['characterKey']
         
         character = ndb.Key(urlsafe=characterKey).get()
         participant = ndb.Key(urlsafe=participantKey).get()
-        
-        if character is not None and participant is not None and participant.characterKey is None and character.get_matching_participant is None:
-            participant.characterKey = character.key;
+
+        #todo need to ensure character is not taken
+        if character is not None and participant is not None and participant.characterKey is None:
+            participant.characterKey = character.key
             participant.put()
 
 app = webapp2.WSGIApplication([

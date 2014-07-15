@@ -22,40 +22,45 @@ angular.module('superheroSelector', ['ui.bootstrap'])
 
 .controller('selectCharacterCtrl', function ($scope, $http, $location, $modal) {
 
-    $http.post('/ajax/characters', { 'characterType': $location.search()['type'] })
+    (function() {
+        var urlSplit = $location.path().split("/");
+        $scope.characterType = urlSplit[urlSplit.length - 1];
+        $scope.participantKey = urlSplit[urlSplit.length - 2];
+        $http.post('/ajax/characters', { 'characterType': $scope.characterType })
         .success(function (data) {
             console.log(data);
             $scope.characters = data;
         });
+    }());
 
     $scope.preview = function (character) {
         var modalInstance = $modal.open({
-            templateUrl: 'templates/preview.html',
+            templateUrl: '/templates/preview.html',
             controller: 'previewCtrl',
             size: 'lg',
             resolve: {
                 character: function () {
                     return character;
                 },
-                userId: function () {
-                    return $location.search()['id']
+                participantKey: function () {
+                    return $scope.participantKey
                 }
             }
         });
     };
 })
 
-.controller('previewCtrl', function ($scope, $modalInstance, $http, character, userId) {
+.controller('previewCtrl', function ($scope, $modalInstance, $http, character, participantKey) {
 
     $scope.character = character;
-    $scope.userId = userId;
+    $scope.participantKey = participantKey;
 
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };
 
     $scope.confirm = function () {
-        $http.post('/ajax/select', { 'userId': $scope.userId, 'characterId': $scope.character.id })
+        $http.post('/ajax/select', { 'participantKey': $scope.participantKey, 'characterKey': $scope.character.url_safe_key })
         .success(function (data) {
             console.log(data);
             $scope.characters = data;

@@ -34,19 +34,19 @@ class Theme:
     def eligibleVillains(self):
         return self.takenVillainCount < self.heroCount
 
-    def increment(self, character):
+    def increment(self, character, takenCharacterKeys):
         if character.type == 'hero':
             self.heroCount = self.heroCount + 1
-            if character.participant is not None:
+            if character.key in takenCharacterKeys:
                 self.takenHeroCount = self.takenHeroCount + 1
         else:
             self.villainCount = self.villainCount + 1
-            if character.participant is not None:
+            if character.key in takenCharacterKeys:
                 self.takenVillainCount = self.takenVillainCount + 1
 
 class CharacterViewModel:
-    def  __init__(self, id, name, image, type, theme, taken, eligible):
-        self.id = id
+    def  __init__(self, url_safe_key, name, image, type, theme, taken, eligible):
+        self.url_safe_key = url_safe_key
         self.name = name
         self.image = image
         self.type = type
@@ -61,24 +61,24 @@ class CharacterViewModel:
         takenCharacterKeys = []
         eligibleThemes = []
 
-        costumedParticipants = Participant.get_all_participants_with_characters()
-        for cp in costumedParticipants:
-            if cp.Character is not None:
-                takenCharacterKeys.append(cp.Character)
+        participants = Participant.get_all_participants()
+        for cp in participants:
+            if cp.characterKey is not None:
+                takenCharacterKeys.append(cp.characterKey)
                 eligibleThemes.append(cp.get_character().theme)
         
         characterRecords = Character.get_all_characters()
         
-        lockdown = costumedParticipants.count() == 12
+        lockdown = len(takenCharacterKeys) == 12
 
         #first pass - get all themes and establish eligibility
         for character in characterRecords:
 
             if character.theme in themes:
-                themes[character.theme].increment(character)
+                themes[character.theme].increment(character, takenCharacterKeys)
             else:
                 themes[character.theme] = Theme()
-                themes[character.theme].increment(character)
+                themes[character.theme].increment(character, takenCharacterKeys)
 
         #second pass - establish individual characters
         for character in characterRecords:
@@ -91,12 +91,12 @@ class CharacterViewModel:
                 else:
                     eligible = themes[character.theme].eligibleVillains()
 
-                characters.append(CharacterViewModel(character.key.id(),
+                characters.append(CharacterViewModel(character.key.urlsafe(),
                         character.name,
                         (character.name.replace(' ','-') + '.png').lower(),
                         character.type,
                         character.theme,
-                        character.key in takenCharacterKeys or (lockdown and character.theme in eligibleThemes),
-                        eligible))
+                        character.key in takenCharacterKeys,
+                        eligible or (lockdown and character.theme in eligibleThemes)))
 
         return characters
