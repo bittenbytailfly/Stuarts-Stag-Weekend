@@ -19,6 +19,8 @@ import webapp2
 import json
 import logging
 from models.viewmodels import CharacterViewModel
+from models.viewmodels import SecretIdentityViewModel
+from models.factories import SecretIdentityFactory
 from google.appengine.ext import ndb
 
 
@@ -42,11 +44,24 @@ class SelectionHandler(webapp2.RequestHandler):
         participant = ndb.Key(urlsafe=participantKey).get()
 
         #todo need to ensure character is not taken
-        if character is not None and participant is not None and participant.characterKey is None:
+        if character is not None and participant is not None and participant.characterKey is None and character.taken == False:
             participant.characterKey = character.key
             participant.put()
+            character.taken = True
+            character.put()
+            #todo: if only one hero or villain for theme left, it needs to be removed.
+            
+class GetSecretIdentitiesHandler(webapp2.RequestHandler):
+    def post(self):
+        secret_identities = SecretIdentityFactory.get_all_participants()
+        result = []
+        for i in secret_identites:
+            result.append(i.__dict__)
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(json.dumps(result))
 
 app = webapp2.WSGIApplication([
     ('/ajax/characters', CharacterHandler),
-    ('/ajax/select', SelectionHandler)
+    ('/ajax/select', SelectionHandler),
+    ('/ajax/get-identities', GetSecretIdentitiesHandler)
 ], debug=True)

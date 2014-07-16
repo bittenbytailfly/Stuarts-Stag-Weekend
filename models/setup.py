@@ -24,19 +24,19 @@ from models.entities import Participant
 class ConstructData:
     @staticmethod
     def SetupDataStructures():
-        batman = Character(name='Batman', type='hero', theme='batman')
+        batman = Character(name='Batman', type='hero', theme='batman', taken=False)
         batman.put()
-        robin = Character(name='Robin', type='hero', theme='batman')
+        robin = Character(name='Robin', type='hero', theme='batman', taken=False)
         robin.put()
-        joker = Character(name='Joker', type='villain', theme='batman')
+        joker = Character(name='Joker', type='villain', theme='batman', taken=False)
         joker.put()
 
-        superman = Character(name='Superman', type='hero', theme='superman')
+        superman = Character(name='Superman', type='hero', theme='superman', taken=False)
         superman.put()
-        lex = Character(name='Lex Luthor', type='villain', theme='superman')
+        lex = Character(name='Lex Luthor', type='villain', theme='superman', taken=False)
         lex.put()
-        zod = Character(name='General Zod', type='villain', theme='superman')
+        zod = Character(name='General Zod', type='villain', theme='superman', taken=False)
         zod.put()
 
-        ed = Participant(name='Ed Carter')
+        ed = Participant(name='Ed Carter', catchphrase='')
         ed.put()

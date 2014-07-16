@@ -21,6 +21,7 @@ from google.appengine.ext import ndb
 from models.entities import Participant
 from models.entities import Character
 
+
 class Theme:
     def __init__(self):
         self.heroCount = 0
@@ -34,14 +35,14 @@ class Theme:
     def eligibleVillains(self):
         return self.takenVillainCount < self.heroCount
 
-    def increment(self, character, takenCharacterKeys):
+    def increment(self, character):
         if character.type == 'hero':
             self.heroCount = self.heroCount + 1
-            if character.key in takenCharacterKeys:
+            if character.taken:
                 self.takenHeroCount = self.takenHeroCount + 1
         else:
             self.villainCount = self.villainCount + 1
-            if character.key in takenCharacterKeys:
+            if character.taken:
                 self.takenVillainCount = self.takenVillainCount + 1
 
 class CharacterViewModel:
@@ -58,45 +59,49 @@ class CharacterViewModel:
     def GetAllCharacters(characterType):
         characters = []
         themes = {}
-        takenCharacterKeys = []
         eligibleThemes = []
-
-        participants = Participant.get_all_participants()
-        for cp in participants:
-            if cp.characterKey is not None:
-                takenCharacterKeys.append(cp.characterKey)
-                eligibleThemes.append(cp.get_character().theme)
+        taken_character_count = 0
         
         characterRecords = Character.get_all_characters()
+        participant_count = Participant.get_all_participants().count()
         
-        lockdown = len(takenCharacterKeys) == 12
-
         #first pass - get all themes and establish eligibility
         for character in characterRecords:
-
-            if character.theme in themes:
-                themes[character.theme].increment(character, takenCharacterKeys)
-            else:
+            if character.theme not in themes:
                 themes[character.theme] = Theme()
-                themes[character.theme].increment(character, takenCharacterKeys)
+            themes[character.theme].increment(character)
+            if character.taken:
+                taken_character_count = taken_character_count + 1
+                if character.theme not in eligibleThemes:
+                    eligibleThemes.append(character.theme)
+
+        lockdown = taken_character_count == int(participant_count / 2)
 
         #second pass - establish individual characters
         for character in characterRecords:
-
             if (character.type == characterType):
-
                 eligible = False
-                if character.type == 'hero':
-                    eligible = themes[character.theme].eligibleHeroes()
+                if lockdown:
+                    eligible = character.theme in eligibleThemes
                 else:
-                    eligible = themes[character.theme].eligibleVillains()
+                    if character.type == 'hero':
+                        eligible = themes[character.theme].eligibleHeroes()
+                    else:
+                        eligible = themes[character.theme].eligibleVillains()
 
                 characters.append(CharacterViewModel(character.key.urlsafe(),
                         character.name,
                         (character.name.replace(' ','-') + '.png').lower(),
                         character.type,
                         character.theme,
-                        character.key in takenCharacterKeys,
-                        eligible or (lockdown and character.theme in eligibleThemes)))
+                        character.taken,
+                        eligible))
 
         return characters
+        
+class SecretIdentityViewModel:
+    def __init__(self, name, character_name, image_url, catch_phrase):
+        self.name = name
+        self.character_name = character_name
+        self.image_url = image_url
+        self.catch_phrase = catch_phrase

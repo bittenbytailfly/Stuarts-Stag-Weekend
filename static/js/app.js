@@ -67,4 +67,13 @@ angular.module('superheroSelector', ['ui.bootstrap'])
         });
     };
 
+})
+
+.controller('secretIdentitiesController', function($scope) {
+    
+    $http.post('/ajax/get-identities')
+        .success(function (data) {
+            $scope.identites = data;
+        });
+    
 });

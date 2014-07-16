@@ -24,6 +24,7 @@ class Character(ndb.Model):
     name = ndb.StringProperty()
     type = ndb.StringProperty(choices=['hero', 'villain'])
     theme = ndb.StringProperty()
+    taken = ndb.BooleanProperty()
 
     @classmethod
     def get_all_characters(cls):
@@ -31,6 +32,7 @@ class Character(ndb.Model):
 
 class Participant(ndb.Model):
     name = ndb.StringProperty()
+    catchphrase = ndb.StringProperty()
     characterKey = ndb.KeyProperty(kind=Character)
 
     def get_character(self):

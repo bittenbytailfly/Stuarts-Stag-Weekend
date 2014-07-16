@@ -26,34 +26,33 @@ from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
 from webapp2_extras import routes
 
+
 class MainHandler(webapp2.RequestHandler):
-    def get(self, participantKey):
-        participantKey = ndb.Key(urlsafe=participantKey or '')
-        participant = participantKey.get()
-        
+    def get(self, url_safe_participant_key):
+        participant_key = ndb.Key(urlsafe=url_safe_participant_key or '')
+        participant = participant_key.get()
         if participant is None:
             self.redirect('/')
-        
         path = os.path.join(os.path.dirname(__file__), '../views/select-type.html')
-        self.response.out.write(template.render(path, {'participantKey': participantKey.urlsafe()}))
+        self.response.out.write(template.render(path, {'participantKey': url_safe_participant_key}))
 
 class CharacterPageHandler(webapp2.RequestHandler):
-    def get(self, participantKey, characterType):
+    def get(self, url_safe_participant_key, character_type):
         path = os.path.join(os.path.dirname(__file__), '../views/select-character.html')
-        self.response.out.write(template.render(path, {'participantKey': participantKey, 'characterType': characterType}))
+        self.response.out.write(template.render(path, {'participantKey': url_safe_participant_key, 'characterType': character_type}))
 
 class PopulateHandler(webapp2.RequestHandler):
     def get(self):
         ConstructData.SetupDataStructures()
 
-class UnknownUserHandler(webapp2.RequestHandler):
+class SecretIdentitiesHandler(webapp2.RequestHandler):
     def get(self):
-        path = os.path.join(os.path.dirname(__file__), '../views/unauthorised.html')
+        path = os.path.join(os.path.dirname(__file__), '../views/secret-identities.html')
         self.response.out.write(template.render(path, None))
 
 app = webapp2.WSGIApplication([
     webapp2.Route('/populate', PopulateHandler),
-    webapp2.Route('/<participantKey>', MainHandler),
-    webapp2.Route('/<participantKey>/<characterType:hero|villain>', CharacterPageHandler),
-    webapp2.Route('/', UnknownUserHandler)
+    webapp2.Route('/<url_safe_participant_key>', MainHandler),
+    webapp2.Route('/<url_safe_participant_key>/<character_type:hero|villain>', CharacterPageHandler),
+    webapp2.Route('/', SecretIdentitiesHandler)
 ], debug=True)
