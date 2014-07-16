@@ -16,43 +16,68 @@
 #
 import os
 import webapp2
-import json
 import logging
+import json
 
 from models.setup import ConstructData
-from models.participantfactory import Participant
-from models.participantfactory import ParticipantFactory
 from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
-from webapp2_extras import routes
+from models.factories import SecretIdentityFactory
 
 
-class MainHandler(webapp2.RequestHandler):
-    def get(self, url_safe_participant_key):
-        participant_key = ndb.Key(urlsafe=url_safe_participant_key or '')
-        participant = participant_key.get()
-        if participant is None:
+class BaseHandler(webapp2.RequestHandler):
+    def __init__(self, request, response):
+        self.initialize(request, response)
+        self.url_safe_participant_key = self.request.cookies.get('participant_key')
+
+    def get_participant(self):
+        participant_key = ndb.Key(urlsafe=self.url_safe_participant_key)
+        return participant_key.get()
+
+class SecuredBaseHandler(BaseHandler):
+    def dispatch(self):
+        if self.get_participant() is None or self.get_participant().character_key is not None:
             self.redirect('/')
-        path = os.path.join(os.path.dirname(__file__), '../views/select-type.html')
-        self.response.out.write(template.render(path, {'participantKey': url_safe_participant_key}))
+        else:
+            super(SecuredBaseHandler, self).dispatch()
 
-class CharacterPageHandler(webapp2.RequestHandler):
-    def get(self, url_safe_participant_key, character_type):
+class SetParticipantHandler(webapp2.RequestHandler):
+    def get(self, url_safe_participant_key):
+        logging.warning(self.request.host_url)
+        if url_safe_participant_key is not None:
+            self.response.set_cookie('participant_key', url_safe_participant_key, max_age=None)
+        self.redirect('/')
+
+class CharacterTypeSelectionHandler(SecuredBaseHandler):
+    def get(self):
+        path = os.path.join(os.path.dirname(__file__), '../views/select-type.html')
+        self.response.out.write(template.render(path, None))
+
+class CharacterPageHandler(SecuredBaseHandler):
+    def get(self, character_type):
         path = os.path.join(os.path.dirname(__file__), '../views/select-character.html')
-        self.response.out.write(template.render(path, {'participantKey': url_safe_participant_key, 'characterType': character_type}))
+        self.response.out.write(template.render(path, {'characterType': character_type}))
 
 class PopulateHandler(webapp2.RequestHandler):
     def get(self):
-        ConstructData.SetupDataStructures()
+        ConstructData.setup_data_structure()
 
-class SecretIdentitiesHandler(webapp2.RequestHandler):
+class SecretIdentitiesHandler(BaseHandler):
     def get(self):
+        participant = self.get_participant()
+        template_values = {'secretIdentity': 'null'}
+
+        if participant is not None:
+            secret_identity = SecretIdentityFactory.get_participant_secret_identity(participant)
+            template_values = {'secretIdentity': json.dumps(secret_identity.__dict__)}
+
         path = os.path.join(os.path.dirname(__file__), '../views/secret-identities.html')
-        self.response.out.write(template.render(path, None))
+        self.response.out.write(template.render(path, template_values))
 
 app = webapp2.WSGIApplication([
+    webapp2.Route('/u/<url_safe_participant_key>', SetParticipantHandler),
     webapp2.Route('/populate', PopulateHandler),
-    webapp2.Route('/<url_safe_participant_key>', MainHandler),
-    webapp2.Route('/<url_safe_participant_key>/<character_type:hero|villain>', CharacterPageHandler),
+    webapp2.Route('/select', CharacterTypeSelectionHandler),
+    webapp2.Route('/<character_type:hero|villain>', CharacterPageHandler),
     webapp2.Route('/', SecretIdentitiesHandler)
 ], debug=True)

@@ -69,7 +69,7 @@
     </style>
 </head>
 <body ng-controller="selectCharacterCtrl">
-    <div class="container">
+    <div class="container" ng-init="characterType='{{characterType}}'">
         <div class="row">
             <div class="col-md-3 col-sm-4 col-xs-6" ng-repeat="c in characters">
                 <div class="hero-select" ng-class="{'hero-selectable': !c.taken && c.eligible, 'hero-ineligible': !c.eligible || c.taken, 'hero-taken': c.taken}" ng-click="preview(c)">

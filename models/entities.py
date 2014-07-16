@@ -26,6 +26,9 @@ class Character(ndb.Model):
     theme = ndb.StringProperty()
     taken = ndb.BooleanProperty()
 
+    def get_image_url(self):
+        return self.name.replace(' ', '-') + '.png'
+
     @classmethod
     def get_all_characters(cls):
         return cls.query()
@@ -33,10 +36,10 @@ class Character(ndb.Model):
 class Participant(ndb.Model):
     name = ndb.StringProperty()
     catchphrase = ndb.StringProperty()
-    characterKey = ndb.KeyProperty(kind=Character)
+    character_key = ndb.KeyProperty(kind=Character)
 
     def get_character(self):
-        return self.characterKey.get()
+        return self.character_key.get()
 
     @classmethod
     def get_all_participants(cls):

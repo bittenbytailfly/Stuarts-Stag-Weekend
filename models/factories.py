@@ -14,18 +14,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import os
-import logging
-
-from google.appengine.ext import ndb
 from models.entities import Participant
 from models.entities import Character
 from models.viewmodels import SecretIdentityViewModel
+from models.viewmodels import CharacterViewModel
 
 
 class SecretIdentityFactory:
     @staticmethod
-    def get_all_participants:
+    def get_participant_secret_identity(participant):
+        image_url = 'unknown.png'
+        character_name = 'unknown'
+
+        character = participant.get_character()
+        if character is not None:
+            image_url = character.get_image_url()
+            character_name = character.name
+
+        return SecretIdentityViewModel(participant.name, character_name, image_url, participant.catchphrase)
+
+    @staticmethod
+    def get_all_participants():
         
         secret_identities = []
         participants = Participant.query().sort(Participant.name)
@@ -40,8 +49,41 @@ class SecretIdentityFactory:
                 image_url = character.name.replace(' ','-') + '.png'
                 character_name = character.name
                 
-            secret_identities.append(
-                    SecretIdentity(p.name, character_name, image_url, p.catch_phrase)
-                )
+            secret_identities.append(SecretIdentityViewModel(p.name, character_name, image_url, p.catch_phrase))
                 
         return participants
+
+
+class CharacterFactory:
+    @staticmethod
+    def get_character_selection_viewmodel(character_type):
+        character_viewmodels = []
+        taken_heroes = 0
+        taken_villains = 0
+
+        characters = Character.get_all_characters()
+        total_participants = Participant.get_all_participants().count()
+
+        #first pass - get all themes and establish eligibility
+        for c in characters:
+            if c.taken and c.type == 'hero':
+                taken_heroes += 1
+            else:
+                taken_villains += 1
+
+        heroes_eligible = taken_heroes <= int(total_participants / 2)
+        villains_eligible = taken_villains <= int(total_participants / 2)
+
+        #second pass - establish individual characters
+        for c in characters:
+            if c.type == character_type:
+                eligible = False
+                if c.type == 'hero':
+                    eligible = heroes_eligible
+                else:
+                    eligible = villains_eligible
+
+                character_viewmodels.append(CharacterViewModel(c.key.urlsafe(), c.name, c.get_image_url(), c.type, c.theme,
+                                                     c.taken, eligible))
+
+        return character_viewmodels

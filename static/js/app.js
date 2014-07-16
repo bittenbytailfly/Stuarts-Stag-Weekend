@@ -13,25 +13,17 @@ angular.module('superheroSelector', ['ui.bootstrap'])
 
 .controller('selectTypeCtrl', function ($scope, $http) {
 
-    $http.post('/ajax/availableTypes')
-        .success(function (data) {
-            $scope.heroes = data.heroes;
-            $scope.villains = data.villains;
-        });
 })
 
-.controller('selectCharacterCtrl', function ($scope, $http, $location, $modal) {
+.controller('selectCharacterCtrl', function ($scope, $http, $location, $modal, $timeout) {
 
-    (function() {
-        var urlSplit = $location.path().split("/");
-        $scope.characterType = urlSplit[urlSplit.length - 1];
-        $scope.participantKey = urlSplit[urlSplit.length - 2];
+    $timeout(function() {
         $http.post('/ajax/characters', { 'characterType': $scope.characterType })
         .success(function (data) {
             console.log(data);
             $scope.characters = data;
         });
-    }());
+    });
 
     $scope.preview = function (character) {
         var modalInstance = $modal.open({
@@ -41,26 +33,22 @@ angular.module('superheroSelector', ['ui.bootstrap'])
             resolve: {
                 character: function () {
                     return character;
-                },
-                participantKey: function () {
-                    return $scope.participantKey
                 }
             }
         });
     };
 })
 
-.controller('previewCtrl', function ($scope, $modalInstance, $http, character, participantKey) {
+.controller('previewCtrl', function ($scope, $modalInstance, $http, character) {
 
     $scope.character = character;
-    $scope.participantKey = participantKey;
 
     $scope.cancel = function () {
         $modalInstance.dismiss('cancel');
     };
 
     $scope.confirm = function () {
-        $http.post('/ajax/select', { 'participantKey': $scope.participantKey, 'characterKey': $scope.character.url_safe_key })
+        $http.post('/ajax/select', { 'characterKey': $scope.character.url_safe_key })
         .success(function (data) {
             console.log(data);
             $scope.characters = data;
@@ -69,11 +57,10 @@ angular.module('superheroSelector', ['ui.bootstrap'])
 
 })
 
-.controller('secretIdentitiesController', function($scope) {
-    
+.controller('secretIdentitiesController', function($scope, $http) {
+
     $http.post('/ajax/get-identities')
         .success(function (data) {
             $scope.identites = data;
         });
-    
 });

@@ -14,16 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import os
-import logging
-
 from models.entities import Character
 from models.entities import Participant
 
 
 class ConstructData:
     @staticmethod
-    def SetupDataStructures():
+    def setup_data_structure():
         batman = Character(name='Batman', type='hero', theme='batman', taken=False)
         batman.put()
         robin = Character(name='Robin', type='hero', theme='batman', taken=False)

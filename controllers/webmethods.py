@@ -21,41 +21,47 @@ import logging
 from models.viewmodels import CharacterViewModel
 from models.viewmodels import SecretIdentityViewModel
 from models.factories import SecretIdentityFactory
+from models.factories import CharacterFactory
 from google.appengine.ext import ndb
+from controllers.main import BaseHandler
 
 
-class CharacterHandler(webapp2.RequestHandler):
+class BaseAjaxHandler(BaseHandler):
+    def dispatch(self):
+        if self.get_participant() is None:
+            self.abort(403)
+        else:
+            super(BaseAjaxHandler, self).dispatch()
+
+class CharacterHandler(BaseAjaxHandler):
     def post(self):
-        characterType = json.loads(self.request.body)['characterType']
-        characters = CharacterViewModel.GetAllCharacters(characterType)
+        character_type = json.loads(self.request.body)['characterType']
+        characters = CharacterFactory.get_character_selection_viewmodel(character_type)
         result = []
         for c in characters:
             result.append(c.__dict__)
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(result))
 
-class SelectionHandler(webapp2.RequestHandler):
+class SelectionHandler(BaseAjaxHandler):
     def post(self):
         params = json.loads(self.request.body)
-        participantKey = params['participantKey']
-        characterKey = params['characterKey']
+        character_key = params['characterKey']
         
-        character = ndb.Key(urlsafe=characterKey).get()
-        participant = ndb.Key(urlsafe=participantKey).get()
+        character = ndb.Key(urlsafe=character_key).get()
+        participant = self.get_participant()
 
-        #todo need to ensure character is not taken
-        if character is not None and participant is not None and participant.characterKey is None and character.taken == False:
-            participant.characterKey = character.key
+        if character is not None and participant.character_key is None and character.taken is False:
+            participant.character_key = character.key
             participant.put()
             character.taken = True
             character.put()
-            #todo: if only one hero or villain for theme left, it needs to be removed.
             
-class GetSecretIdentitiesHandler(webapp2.RequestHandler):
+class GetSecretIdentitiesHandler(BaseHandler):
     def post(self):
         secret_identities = SecretIdentityFactory.get_all_participants()
         result = []
-        for i in secret_identites:
+        for i in secret_identities:
             result.append(i.__dict__)
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(result))
