@@ -1,17 +1,21 @@
 body {
     background: #ccc;
     background: url(../images/comic-bg.png);
+    font-family: 'Bangers', sans-serif;
+    font-size: 17px;
+    margin-bottom: 1em;
 }
 
 h1 {
-    font-family: 'Bangers', cursive;
     color: #eee;
     text-align: center;
-    font-size: 5em;
+    font-size: 3em;
 }
 
-h2, blockquote {
-    font-family: 'Bangers', cursive;
+h2 {
+    text-align: center;
+    font-size: 2em;
+    color: #eee;
 }
 
 blockquote {
@@ -20,31 +24,20 @@ blockquote {
 
 .hero-select {
     background: #fff;
-    margin: 2em;
+    margin: 0.2em;
     padding: 0.5em;
-    -webkit-box-shadow: 0px 0px 0px 0px rgba(50, 50, 50, 0.75);
-    -moz-box-shadow: 0px 0px 0px 0px rgba(50, 50, 50, 0.75);
-    box-shadow: 0px 0px 0px 0px rgba(50, 50, 50, 0.75);
-}
-
-.hero-select.hero-selectable:hover {
-    transition: all 0.1s ease-in;
-    margin: 1em;
-    -webkit-box-shadow: 0px 0px 30px 0px rgba(50, 50, 50, 1);
-    -moz-box-shadow: 0px 0px 30px 0px rgba(50, 50, 50, 1);
-    box-shadow: 0px 0px 30px 0px rgba(50, 50, 50, 1);
 }
 
 .hero-select img {
     margin: auto;
 }
 
-.hero-ineligible img {
+img.hero-ineligible {
     -webkit-filter: grayscale(1);
 }
 
-.hero-select.hero-ineligible::after {
-    font-size: 2em;
+span.hero-ineligible, span.hero-taken {
+    font-size: 1em;
     position: absolute;
     top: 0;
     right: 0;
@@ -57,19 +50,57 @@ blockquote {
     -webkit-box-shadow: -10px 10px 30px 0px rgba(50, 50, 50, 0.75);
     -moz-box-shadow: -10px 10px 30px 0px rgba(50, 50, 50, 0.75);
     box-shadow: -10px 10px 30px 0px rgba(50, 50, 50, 0.75);
-}
-
-.hero-select.hero-taken.hero-taken::after {
-    content: 'taken';
+    z-index: 999;
 }
 
 .character-card {
     background: #fff;
-    margin: 1em;
+    margin: 1em 1em 0 1em;
     padding: 1em;
     border-radius: 0.5em;
 }
 
 .unselected {
     opacity: 0.5;
+}
+
+.modal-body {
+    font-family: 'Roboto', sans-serif;
+}
+
+.hero-selectable {
+    cursor: pointer;
+}
+
+@media (min-width: 768px) {
+    .hero-select.hero-ineligible{
+        font-size: 1.5em;
+    }
+}
+
+@media (min-width: 992px) {
+    .hero-select {
+        margin: 2em;
+        -webkit-box-shadow: 0px 0px 0px 0px rgba(50, 50, 50, 0.75);
+        -moz-box-shadow: 0px 0px 0px 0px rgba(50, 50, 50, 0.75);
+        box-shadow: 0px 0px 0px 0px rgba(50, 50, 50, 0.75);
+    }
+
+    .hero-select.hero-selectable:hover {
+        transition: all 0.1s ease-in;
+        margin: 1em;
+        -webkit-box-shadow: 0px 0px 30px 0px rgba(50, 50, 50, 1);
+        -moz-box-shadow: 0px 0px 30px 0px rgba(50, 50, 50, 1);
+        box-shadow: 0px 0px 30px 0px rgba(50, 50, 50, 1);
+    }
+
+    span.hero-ineligible, span.hero-taken {
+        font-size: 1.5em;
+    }
+}
+
+@media (min-width: 1200px) {
+    span.hero-ineligible, span.hero-taken {
+        font-size: 2em;
+    }
 }

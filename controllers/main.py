@@ -18,6 +18,7 @@ import os
 import webapp2
 import logging
 import json
+import datetime
 
 from models.setup import ConstructData
 from google.appengine.ext import ndb
@@ -48,13 +49,9 @@ class SetParticipantHandler(webapp2.RequestHandler):
     def get(self, url_safe_participant_key):
         logging.warning(self.request.host_url)
         if url_safe_participant_key is not None:
-            self.response.set_cookie('participant_key', url_safe_participant_key, max_age=None)
+            self.response.set_cookie('participant_key', url_safe_participant_key,
+                                     expires=datetime.datetime.now() + datetime.timedelta(days=365))
         self.redirect('/')
-
-class CharacterTypeSelectionHandler(SecuredBaseHandler):
-    def get(self):
-        path = os.path.join(os.path.dirname(__file__), '../views/select-type.html')
-        self.response.out.write(template.render(path, None))
 
 class CharacterPageHandler(SecuredBaseHandler):
     def get(self, character_type):
@@ -63,6 +60,9 @@ class CharacterPageHandler(SecuredBaseHandler):
 
 class PopulateHandler(webapp2.RequestHandler):
     def get(self):
+        self.response.out.write('<form method="post"><input type="submit"/></form>')
+
+    def post(self):
         ConstructData.setup_data_structure()
 
 class SecretIdentitiesHandler(BaseHandler):
@@ -73,16 +73,15 @@ class SecretIdentitiesHandler(BaseHandler):
 class RemoveIdentityHandler(BaseHandler):
     def post(self):
         participant = self.get_participant()
-        if participant is None:
-            self.redirect('/')
+        if participant is not None:
+            character = participant.get_character()
+            participant.character_key = None
+            participant.catchphrase = ''
+            participant.put()
+            character.taken = False
+            character.put()
 
-        character = participant.get_character()
-        participant.character_key = None
-        participant.catchphrase = ''
-        participant.put()
-        character.taken = False
-        character.put()
-        self.redirect('/select')
+        self.redirect('/')
 
 class ChooseHeroHandler(SecuredBaseHandler):
     def post(self):
@@ -105,7 +104,6 @@ app = webapp2.WSGIApplication([
     webapp2.Route('/u/<url_safe_participant_key>', SetParticipantHandler),
     webapp2.Route('/populate', PopulateHandler),
     webapp2.Route('/remove-identity', RemoveIdentityHandler),
-    webapp2.Route('/select', CharacterTypeSelectionHandler),
     webapp2.Route('/<character_type:hero|villain>', CharacterPageHandler),
     webapp2.Route('/choose-hero', ChooseHeroHandler),
     webapp2.Route('/', SecretIdentitiesHandler)

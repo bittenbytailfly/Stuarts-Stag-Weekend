@@ -7,15 +7,11 @@ angular.module('superheroSelector', ['ui.bootstrap'])
     $interpolateProvider.endSymbol('//');
 })
 
-.config(function ($locationProvider) {
-    $locationProvider.html5Mode(true);
-})
-
 .controller('selectTypeCtrl', function ($scope, $http) {
 
 })
 
-.controller('selectCharacterCtrl', function ($scope, $http, $location, $modal, $timeout) {
+.controller('selectCharacterCtrl', function ($scope, $http, $modal, $timeout) {
 
     $timeout(function() {
         $http.post('/ajax/characters', { 'characterType': $scope.characterType })
@@ -26,18 +22,20 @@ angular.module('superheroSelector', ['ui.bootstrap'])
     });
 
     $scope.preview = function (character) {
-        var modalInstance = $modal.open({
-            templateUrl: '/templates/preview.html',
-            controller: 'previewCtrl',
-            size: 'lg',
-            keyboard: false,
-            backdrop: 'static',
-            resolve: {
-                character: function () {
-                    return character;
+        if (!character.taken && character.eligible) {
+            var modalInstance = $modal.open({
+                templateUrl: '/templates/preview.html',
+                controller: 'previewCtrl',
+                size: 'lg',
+                keyboard: false,
+                backdrop: 'static',
+                resolve: {
+                    character: function () {
+                        return character;
+                    }
                 }
-            }
-        });
+            });
+        }
     };
 })
 
@@ -53,11 +51,24 @@ angular.module('superheroSelector', ['ui.bootstrap'])
 
 .controller('secretIdentitiesController', function($scope, $http, $modal) {
 
+    $scope.$watch('participants', function(oldVal, newVal) {
+        if (oldVal !== newVal) {
+            $scope.setRange(newVal);
+        }
+    }, true);
+
     $http.post('/ajax/get-identities')
         .success(function (data) {
             $scope.secretIdentity = data.secretIdentity;
             $scope.participants = data.participants;
         });
+
+    $scope.setRange = function(participants) {
+        $scope.participantTrios = [];
+        for( var i = 0; i < $scope.participants.length; i = i + 3 ) {
+            $scope.participantTrios.push(i);
+        }
+    };
 
     $scope.change = function() {
         var modalInstance = $modal.open({

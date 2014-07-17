@@ -15,66 +15,17 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-    <style>
-        body {
-            background: #ccc;
-            padding: 100px 0;
-            background: url(../images/comic-bg.png);
-            font-family: 'Bangers', cursive;
-        }
-
-        .hero-select {
-            background: #fff;
-            margin: 2em;
-            padding: 0.5em;
-            -webkit-box-shadow: 0px 0px 0px 0px rgba(50, 50, 50, 0.75);
-            -moz-box-shadow: 0px 0px 0px 0px rgba(50, 50, 50, 0.75);
-            box-shadow: 0px 0px 0px 0px rgba(50, 50, 50, 0.75);
-        }
-
-            .hero-select.hero-selectable:hover {
-                transition: all 0.1s ease-in;
-                margin: 1em;
-                -webkit-box-shadow: 0px 0px 30px 0px rgba(50, 50, 50, 1);
-                -moz-box-shadow: 0px 0px 30px 0px rgba(50, 50, 50, 1);
-                box-shadow: 0px 0px 30px 0px rgba(50, 50, 50, 1);
-            }
-
-            .hero-select img {
-                margin: auto;
-            }
-
-        .hero-ineligible img {
-            -webkit-filter: grayscale(1);
-        }
-
-        .hero-select.hero-ineligible::after {
-            font-size: 2em;
-            position: absolute;
-            top: 0;
-            right: 0;
-            padding: 0.2em 1em;
-            content: 'unavailable';
-            text-align: center;
-            background-color: #f00;
-            color: #fff;
-            transition: opacity 0.1s linear;
-            -webkit-box-shadow: -10px 10px 30px 0px rgba(50, 50, 50, 0.75);
-            -moz-box-shadow: -10px 10px 30px 0px rgba(50, 50, 50, 0.75);
-            box-shadow: -10px 10px 30px 0px rgba(50, 50, 50, 0.75);
-        }
-
-        .hero-select.hero-taken.hero-taken::after {
-            content: 'taken';
-        }
-    </style>
+    <link rel="stylesheet" href="/css/cardiff-capers.css"/>
 </head>
 <body ng-controller="selectCharacterCtrl">
     <div class="container" ng-init="characterType='{{characterType}}'">
+        <h1>Choose your //characterType//</h1>
         <div class="row">
             <div class="col-md-3 col-sm-4 col-xs-6" ng-repeat="c in characters">
-                <div class="hero-select" ng-class="{'hero-selectable': !c.taken && c.eligible, 'hero-ineligible': !c.eligible || c.taken, 'hero-taken': c.taken}" ng-click="preview(c)">
-                    <img ng-src="//'/images/' + c.image//" class="img-responsive">
+                <span class="hero-taken" ng-show="c.taken">Taken</span>
+                <span class="hero-ineligible" ng-show="!c.taken && !c.eligible">Unavailable</span>
+                <div class="hero-select" ng-class="{'hero-selectable': !c.taken && c.eligible}" ng-click="preview(c)">
+                    <img ng-src="//'/images/' + c.image//" class="img-responsive" ng-class="{'hero-ineligible': !c.eligible || c.taken, 'hero-taken': c.taken}">
                 </div>
             </div>
         </div>
