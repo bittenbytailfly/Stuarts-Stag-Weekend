@@ -1,12 +1,32 @@
-﻿<div class="modal-header">
-    <h3 class="modal-title">Confirm</h3>
-</div>
-<div class="modal-body">
-    <p>
-        You have chosen //character.name// - are you sure?
-    </p>
-</div>
-<div class="modal-footer">
-    <a class="btn btn-primary" ng-click="confirm()">Yes</a>
-    <button class="btn btn-warning" ng-click="cancel()">No</button>
-</div>
+﻿<form action="/choose-hero" method="post">
+    <div class="modal-header">
+        <h3 class="modal-title">Confirm</h3>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-4">
+                <img ng-src="//'/images/' + character.image//" class="img-responsive" />
+            </div>
+            <div class="col-md-8">
+                <p>You have chosen //character.name//.</p>
+                <p>All good characters need a catchphrase - enter yours here (this will be displayed for
+                    everyone else to see):</p>
+                <div class="form-group">
+                    <textarea name="catchphrase" class="form-control" rows="5"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <div class="progress" ng-show="submitting">
+          <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 100%">
+            <span class="sr-only">Submitting ...</span>
+          </div>
+        </div>
+        <div ng-show="!submitting">
+            <input type="hidden" name="character" value="//character.url_safe_key//"/>
+            <button type="submit" class="btn btn-primary" ng-click="submitting=true">Select</button>
+            <a class="btn btn-warning" ng-click="cancel()">Cancel</a>
+         </div>
+    </div>
+</form>

@@ -43,31 +43,27 @@ class CharacterHandler(BaseAjaxHandler):
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(result))
 
-class SelectionHandler(BaseAjaxHandler):
-    def post(self):
-        params = json.loads(self.request.body)
-        character_key = params['characterKey']
-        
-        character = ndb.Key(urlsafe=character_key).get()
-        participant = self.get_participant()
-
-        if character is not None and participant.character_key is None and character.taken is False:
-            participant.character_key = character.key
-            participant.put()
-            character.taken = True
-            character.put()
-            
 class GetSecretIdentitiesHandler(BaseHandler):
     def post(self):
+        participant = self.get_participant()
+
+        result = {}
+
+        if participant is not None:
+            secret_identity = SecretIdentityFactory.get_participant_secret_identity(participant)
+            result['secretIdentity'] = secret_identity.__dict__
+
+        all_identities_dict = []
         secret_identities = SecretIdentityFactory.get_all_participants()
-        result = []
+
         for i in secret_identities:
-            result.append(i.__dict__)
+            all_identities_dict.append(i.__dict__)
+
+        result['participants'] = all_identities_dict
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(result))
 
 app = webapp2.WSGIApplication([
     ('/ajax/characters', CharacterHandler),
-    ('/ajax/select', SelectionHandler),
     ('/ajax/get-identities', GetSecretIdentitiesHandler)
 ], debug=True)

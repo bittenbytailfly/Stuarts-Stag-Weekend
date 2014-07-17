@@ -31,6 +31,9 @@ class BaseHandler(webapp2.RequestHandler):
         self.url_safe_participant_key = self.request.cookies.get('participant_key')
 
     def get_participant(self):
+        if self.url_safe_participant_key is None:
+            return None
+
         participant_key = ndb.Key(urlsafe=self.url_safe_participant_key)
         return participant_key.get()
 
@@ -64,20 +67,46 @@ class PopulateHandler(webapp2.RequestHandler):
 
 class SecretIdentitiesHandler(BaseHandler):
     def get(self):
-        participant = self.get_participant()
-        template_values = {'secretIdentity': 'null'}
-
-        if participant is not None:
-            secret_identity = SecretIdentityFactory.get_participant_secret_identity(participant)
-            template_values = {'secretIdentity': json.dumps(secret_identity.__dict__)}
-
         path = os.path.join(os.path.dirname(__file__), '../views/secret-identities.html')
-        self.response.out.write(template.render(path, template_values))
+        self.response.out.write(template.render(path, None))
+
+class RemoveIdentityHandler(BaseHandler):
+    def post(self):
+        participant = self.get_participant()
+        if participant is None:
+            self.redirect('/')
+
+        character = participant.get_character()
+        participant.character_key = None
+        participant.catchphrase = ''
+        participant.put()
+        character.taken = False
+        character.put()
+        self.redirect('/select')
+
+class ChooseHeroHandler(SecuredBaseHandler):
+    def post(self):
+        character_key = self.request.get('character')
+        catchphrase = self.request.get('catchphrase', '')
+
+        character = ndb.Key(urlsafe=character_key).get()
+        participant = self.get_participant()
+
+        if character is not None and participant.character_key is None and character.taken is False:
+            participant.character_key = character.key
+            participant.catchphrase = catchphrase
+            participant.put()
+            character.taken = True
+            character.put()
+
+        self.redirect('/')
 
 app = webapp2.WSGIApplication([
     webapp2.Route('/u/<url_safe_participant_key>', SetParticipantHandler),
     webapp2.Route('/populate', PopulateHandler),
+    webapp2.Route('/remove-identity', RemoveIdentityHandler),
     webapp2.Route('/select', CharacterTypeSelectionHandler),
     webapp2.Route('/<character_type:hero|villain>', CharacterPageHandler),
+    webapp2.Route('/choose-hero', ChooseHeroHandler),
     webapp2.Route('/', SecretIdentitiesHandler)
 ], debug=True)

@@ -35,5 +35,7 @@ class ConstructData:
         zod = Character(name='General Zod', type='villain', theme='superman', taken=False)
         zod.put()
 
-        ed = Participant(name='Ed Carter', catchphrase='')
+        ed = Participant(name='Ed C', catchphrase='')
         ed.put()
+        stuart = Participant(name='Stuart B', catchphrase='')
+        stuart.put()

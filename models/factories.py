@@ -18,12 +18,12 @@ from models.entities import Participant
 from models.entities import Character
 from models.viewmodels import SecretIdentityViewModel
 from models.viewmodels import CharacterViewModel
-
+import logging
 
 class SecretIdentityFactory:
     @staticmethod
     def get_participant_secret_identity(participant):
-        image_url = 'unknown.png'
+        image_url = 'unknown.jpg'
         character_name = 'unknown'
 
         character = participant.get_character()
@@ -31,27 +31,28 @@ class SecretIdentityFactory:
             image_url = character.get_image_url()
             character_name = character.name
 
-        return SecretIdentityViewModel(participant.name, character_name, image_url, participant.catchphrase)
+        return SecretIdentityViewModel(participant.name, character_name, image_url,
+                                       participant.catchphrase)
 
     @staticmethod
     def get_all_participants():
         
         secret_identities = []
-        participants = Participant.query().sort(Participant.name)
+        participants = Participant.query().order(Participant.name)
         
         for p in participants:
             
-            image_url = 'unknown.png'
+            image_url = 'unknown.jpg'
             character_name = 'unknown'
-            
-            if p.characterKey is not None:
-                character = p.characterKey.get()
-                image_url = character.name.replace(' ','-') + '.png'
+
+            character = p.get_character()
+            if character is not None:
+                image_url = character.get_image_url()
                 character_name = character.name
                 
-            secret_identities.append(SecretIdentityViewModel(p.name, character_name, image_url, p.catch_phrase))
+            secret_identities.append(SecretIdentityViewModel(p.name, character_name, image_url, p.catchphrase))
                 
-        return participants
+        return secret_identities
 
 
 class CharacterFactory:
@@ -68,11 +69,13 @@ class CharacterFactory:
         for c in characters:
             if c.taken and c.type == 'hero':
                 taken_heroes += 1
-            else:
+            if c.taken and c.type == 'villain':
                 taken_villains += 1
 
-        heroes_eligible = taken_heroes <= int(total_participants / 2)
-        villains_eligible = taken_villains <= int(total_participants / 2)
+        heroes_eligible = taken_villains <= int(total_participants / 2)
+        villains_eligible = taken_heroes <= int(total_participants / 2)
+
+        logging.warning(taken_heroes)
 
         #second pass - establish individual characters
         for c in characters:
@@ -83,7 +86,7 @@ class CharacterFactory:
                 else:
                     eligible = villains_eligible
 
-                character_viewmodels.append(CharacterViewModel(c.key.urlsafe(), c.name, c.get_image_url(), c.type, c.theme,
-                                                     c.taken, eligible))
+                character_viewmodels.append(CharacterViewModel(c.key.urlsafe(), c.name, c.get_image_url(), c.type,
+                                                               c.theme, c.taken, eligible))
 
         return character_viewmodels

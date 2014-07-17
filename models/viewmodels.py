@@ -33,8 +33,8 @@ class CharacterViewModel:
         self.eligible = eligible
         
 class SecretIdentityViewModel:
-    def __init__(self, name, character_name, image_url, catch_phrase):
+    def __init__(self, name, character_name, image_url, catchphrase):
         self.name = name
         self.character_name = character_name
         self.image_url = image_url
-        self.catch_phrase = catch_phrase
+        self.catchphrase = catchphrase

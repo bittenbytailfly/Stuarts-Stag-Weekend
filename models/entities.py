@@ -27,7 +27,7 @@ class Character(ndb.Model):
     taken = ndb.BooleanProperty()
 
     def get_image_url(self):
-        return self.name.replace(' ', '-') + '.png'
+        return self.name.replace(' ', '-').lower() + '.png'
 
     @classmethod
     def get_all_characters(cls):
@@ -39,6 +39,8 @@ class Participant(ndb.Model):
     character_key = ndb.KeyProperty(kind=Character)
 
     def get_character(self):
+        if self.character_key is None:
+            return None
         return self.character_key.get()
 
     @classmethod
