@@ -1,0 +1,75 @@
+body {
+    background: #ccc;
+    background: url(../images/comic-bg.png);
+}
+
+h1 {
+    font-family: 'Bangers', cursive;
+    color: #eee;
+    text-align: center;
+    font-size: 5em;
+}
+
+h2, blockquote {
+    font-family: 'Bangers', cursive;
+}
+
+blockquote {
+    font-size: 2em;
+}
+
+.hero-select {
+    background: #fff;
+    margin: 2em;
+    padding: 0.5em;
+    -webkit-box-shadow: 0px 0px 0px 0px rgba(50, 50, 50, 0.75);
+    -moz-box-shadow: 0px 0px 0px 0px rgba(50, 50, 50, 0.75);
+    box-shadow: 0px 0px 0px 0px rgba(50, 50, 50, 0.75);
+}
+
+.hero-select.hero-selectable:hover {
+    transition: all 0.1s ease-in;
+    margin: 1em;
+    -webkit-box-shadow: 0px 0px 30px 0px rgba(50, 50, 50, 1);
+    -moz-box-shadow: 0px 0px 30px 0px rgba(50, 50, 50, 1);
+    box-shadow: 0px 0px 30px 0px rgba(50, 50, 50, 1);
+}
+
+.hero-select img {
+    margin: auto;
+}
+
+.hero-ineligible img {
+    -webkit-filter: grayscale(1);
+}
+
+.hero-select.hero-ineligible::after {
+    font-size: 2em;
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.2em 1em;
+    content: 'unavailable';
+    text-align: center;
+    background-color: #f00;
+    color: #fff;
+    transition: opacity 0.1s linear;
+    -webkit-box-shadow: -10px 10px 30px 0px rgba(50, 50, 50, 0.75);
+    -moz-box-shadow: -10px 10px 30px 0px rgba(50, 50, 50, 0.75);
+    box-shadow: -10px 10px 30px 0px rgba(50, 50, 50, 0.75);
+}
+
+.hero-select.hero-taken.hero-taken::after {
+    content: 'taken';
+}
+
+.character-card {
+    background: #fff;
+    margin: 1em;
+    padding: 1em;
+    border-radius: 0.5em;
+}
+
+.unselected {
+    opacity: 0.5;
+}
