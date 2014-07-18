@@ -7,7 +7,6 @@ The plan is to have everyone select a hero, ensuring the following:
 
     * Characters must be chosen from an approved list
     * There are to be no duplicates
-    * Every hero must have a corresponding villain
 
 Trying to arrange this via email was proving problematic (given the distributed nature of people) so I decided to create an application for it.
 
