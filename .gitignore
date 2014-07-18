@@ -10,3 +10,4 @@
 .idea/workspace.xml
 controllers/main.py
 *.db
+static/images/Thumbs.db

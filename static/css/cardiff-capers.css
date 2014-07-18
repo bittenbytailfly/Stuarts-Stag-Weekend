@@ -34,6 +34,7 @@ blockquote {
 
 img.hero-ineligible {
     -webkit-filter: grayscale(1);
+    opacity: 0.3;
 }
 
 span.hero-ineligible, span.hero-taken {
