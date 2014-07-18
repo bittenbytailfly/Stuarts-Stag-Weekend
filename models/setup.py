@@ -57,7 +57,7 @@ class ConstructData:
         splinter = Character(name='Splinter', type='hero', theme='tmnt', taken=False)
         leonardo = Character(name='Leonardo', type='hero', theme='tmnt', taken=False)
         shredder = Character(name='Shredder', type='villain', theme='tmnt', taken=False)
-        rorshach = Character(name='Rorshach', type='hero', theme='watchmen', taken=False)
+        rorshach = Character(name='Rorschach', type='hero', theme='watchmen', taken=False)
         nightowl = Character(name='Night Owl', type='hero', theme='watchmen', taken=False)
         ozymandis = Character(name='Ozymandis', type='villain', theme='watchmen', taken=False)
         kickass = Character(name='Kick Ass', type='hero', theme='kick ass', taken=False)
