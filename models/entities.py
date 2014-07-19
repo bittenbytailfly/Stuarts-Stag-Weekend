@@ -27,7 +27,7 @@ class Character(ndb.Model):
     taken = ndb.BooleanProperty()
 
     def get_image_url(self):
-        return self.name.replace(' ', '-').lower() + '.png'
+        return self.name.replace(' ', '-').lower() + '.jpg'
 
     @classmethod
     def get_all_characters(cls):
