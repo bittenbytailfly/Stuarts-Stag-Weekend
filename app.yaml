@@ -4,9 +4,6 @@ runtime: python27
 api_version: 1
 threadsafe: yes
 
-builtins:
-- appstats: on
-
 handlers:
 - url: /(.*\.(gif|png|jpg|css|js|ico|xml|html))
   static_files: static/\1

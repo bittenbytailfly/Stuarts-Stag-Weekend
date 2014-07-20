@@ -144,7 +144,6 @@ class ConstructData:
         markh = Participant(name='Mark H', catchphrase='')
         martinb = Participant(name='Martin B', catchphrase='')
         mikep = Participant(name='Mike P', catchphrase='')
-        stuartb = Participant(name='Stuart B', catchphrase='')
         timp = Participant(name='Tim P', catchphrase='')
 
         aaronb.put()
@@ -168,7 +167,6 @@ class ConstructData:
         markh.put()
         martinb.put()
         mikep.put()
-        stuartb.put()
         timp.put()
 
         edc.associate_character(joker, 'Ever toast with a Breville in the pale moonlight?')
