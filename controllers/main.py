@@ -74,12 +74,7 @@ class RemoveIdentityHandler(BaseHandler):
     def post(self):
         participant = self.get_participant()
         if participant is not None:
-            character = participant.get_character()
-            participant.character_key = None
-            participant.catchphrase = ''
-            participant.put()
-            character.taken = False
-            character.put()
+            participant.unassociate_character()
 
         self.redirect('/')
 
@@ -92,11 +87,7 @@ class ChooseHeroHandler(SecuredBaseHandler):
         participant = self.get_participant()
 
         if character is not None and participant.character_key is None and character.taken is False:
-            participant.character_key = character.key
-            participant.catchphrase = catchphrase
-            participant.put()
-            character.taken = True
-            character.put()
+            participant.associate_character(character, catchphrase)
 
         self.redirect('/')
 
