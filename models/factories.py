@@ -18,18 +18,17 @@ from models.entities import Participant
 from models.entities import Character
 from models.viewmodels import SecretIdentityViewModel
 from models.viewmodels import CharacterViewModel
+from models.entities import Counter
+from models.entities import PARTICIPANT_COUNTER_KEY
+from models.entities import TAKEN_VILLAIN_COUNTER_KEY
+from models.entities import TAKEN_HERO_COUNTER_KEY
 import logging
 
 class SecretIdentityFactory:
     @staticmethod
     def get_participant_secret_identity(participant):
-        image_url = 'unknown.jpg'
-        character_name = 'unknown'
-
-        character = participant.get_character()
-        if character is not None:
-            image_url = character.get_image_url()
-            character_name = character.name
+        image_url = participant.image_url or 'unknown.jpg'
+        character_name = participant.character_name or 'unknown'
 
         return SecretIdentityViewModel(participant.name, character_name, image_url,
                                        participant.catchphrase)
@@ -41,43 +40,27 @@ class SecretIdentityFactory:
         participants = Participant.query().order(Participant.name)
         
         for p in participants:
-            
-            image_url = 'unknown.jpg'
-            character_name = 'unknown'
-
-            character = p.get_character()
-            if character is not None:
-                image_url = character.get_image_url()
-                character_name = character.name
-                
+            image_url = p.image_url or 'unknown.jpg'
+            character_name = p.character_name or 'unknown'
             secret_identities.append(SecretIdentityViewModel(p.name, character_name, image_url, p.catchphrase))
-                
+
         return secret_identities
 
 
 class CharacterFactory:
     @staticmethod
     def get_character_selection_viewmodel(character_type):
+
         character_viewmodels = []
-        taken_heroes = 0
-        taken_villains = 0
 
-        characters = Character.get_all_characters()
-        total_participants = Participant.get_all_participants().count()
+        characters = Character.get_all_characters(character_type)
+        total_participants = Counter.get_total(PARTICIPANT_COUNTER_KEY)
+        taken_heroes = Counter.get_total(TAKEN_HERO_COUNTER_KEY)
+        taken_villains = Counter.get_total(TAKEN_VILLAIN_COUNTER_KEY)
 
-        #first pass - get all themes and establish eligibility
-        for c in characters:
-            if c.taken and c.type == 'hero':
-                taken_heroes += 1
-            if c.taken and c.type == 'villain':
-                taken_villains += 1
+        heroes_eligible = taken_heroes <= int(total_participants / 2)
+        villains_eligible = taken_villains <= int(total_participants / 2)
 
-        heroes_eligible = taken_villains <= int(total_participants / 2)
-        villains_eligible = taken_heroes <= int(total_participants / 2)
-
-        logging.warning(taken_heroes)
-
-        #second pass - establish individual characters
         for c in characters:
             if c.type == character_type:
                 eligible = False
