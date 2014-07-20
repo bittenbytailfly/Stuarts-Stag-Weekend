@@ -58,8 +58,8 @@ class CharacterFactory:
         taken_heroes = Counter.get_total(TAKEN_HERO_COUNTER_KEY)
         taken_villains = Counter.get_total(TAKEN_VILLAIN_COUNTER_KEY)
 
-        heroes_eligible = taken_villains <= int(total_participants / 2)
-        villains_eligible = taken_heroes <= int(total_participants / 2)
+        heroes_eligible = taken_heroes <= int(total_participants / 2)
+        villains_eligible = taken_villains <= int(total_participants / 2)
 
         for c in characters:
             if c.type == character_type:
