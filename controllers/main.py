@@ -32,11 +32,14 @@ class BaseHandler(webapp2.RequestHandler):
         self.url_safe_participant_key = self.request.cookies.get('participant_key')
 
     def get_participant(self):
-        if self.url_safe_participant_key is None:
-            return None
-
-        participant_key = ndb.Key(urlsafe=self.url_safe_participant_key)
-        return participant_key.get()
+        if self.participant is None:
+            if self.url_safe_participant_key is None:
+                return None
+    
+            participant_key = ndb.Key(urlsafe=self.url_safe_participant_key)
+            return participant_key.get()
+        else:
+            return self.participant
 
 class SecuredBaseHandler(BaseHandler):
     def dispatch(self):
@@ -94,6 +97,8 @@ class ChooseHeroHandler(SecuredBaseHandler):
         if character is not None and participant.character_key is None and character.taken is False:
             participant.character_key = character.key
             participant.catchphrase = catchphrase
+            participant.character_name = character.character_name
+            particpant.image_url = character.get_image_url()
             participant.put()
             character.taken = True
             character.put()

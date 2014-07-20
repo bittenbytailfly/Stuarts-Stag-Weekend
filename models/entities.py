@@ -37,6 +37,8 @@ class Participant(ndb.Model):
     name = ndb.StringProperty()
     catchphrase = ndb.StringProperty()
     character_key = ndb.KeyProperty(kind=Character)
+    image_url = ndb.StringProperty()
+    character_name = ndb.StringProperty()
 
     def get_character(self):
         if self.character_key is None:
@@ -46,3 +48,41 @@ class Participant(ndb.Model):
     @classmethod
     def get_all_participants(cls):
         return cls.query()
+        
+PARTICIPANT_COUNTER_KEY = 'counter'
+
+class ParticipantCount(ndb.Model):
+    total: ndbIntegerProperty(default=0)
+    
+    @classmethod
+    def get_total(cls):
+        counterKey = ndb.Key(ParticipantCount, PARTICIPANT_COUNTER_KEY)
+        counter = counterKey.get()
+        if counter is not None:
+            return counter.total
+        else:
+            return 0
+    
+    @classmethod
+    def increment_participant_counter(cls):
+        cls.update_participant_counter(cls, 1)
+            
+    @classmethod
+    def decrement_participant_counter(cls):
+        cls.update_participant_counter(cls, -1)
+        
+    @classmethod
+    @ndb.transactional
+    def update_participant_counter(cls, i):
+        counterKey = ndb.Key(ParticipantCount, PARTICIPANT_COUNTER_KEY)
+        counter = counterKey.get()
+        if counter is None:
+            counter = Counter(total=1)
+            counter.put()
+        else:
+            counter.total += 1
+            counter.put()
+        
+        
+        
+    

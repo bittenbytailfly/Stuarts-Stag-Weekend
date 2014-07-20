@@ -42,14 +42,8 @@ class SecretIdentityFactory:
         
         for p in participants:
             
-            image_url = 'unknown.jpg'
-            character_name = 'unknown'
-
-            character = p.get_character()
-            if character is not None:
-                image_url = character.get_image_url()
-                character_name = character.name
-                
+            image_url = p.image_url or 'unknown.jpg'
+            character_name = p.character_name or 'unknown'
             secret_identities.append(SecretIdentityViewModel(p.name, character_name, image_url, p.catchphrase))
                 
         return secret_identities
@@ -58,12 +52,11 @@ class SecretIdentityFactory:
 class CharacterFactory:
     @staticmethod
     def get_character_selection_viewmodel(character_type):
-        character_viewmodels = []
         taken_heroes = 0
         taken_villains = 0
 
         characters = Character.get_all_characters()
-        total_participants = Participant.get_all_participants().count()
+        total_participants = ParticipantCount.get_total
 
         #first pass - get all themes and establish eligibility
         for c in characters:
@@ -74,8 +67,6 @@ class CharacterFactory:
 
         heroes_eligible = taken_villains <= int(total_participants / 2)
         villains_eligible = taken_heroes <= int(total_participants / 2)
-
-        logging.warning(taken_heroes)
 
         #second pass - establish individual characters
         for c in characters:
