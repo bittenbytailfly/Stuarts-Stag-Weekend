@@ -43,7 +43,7 @@ class SecretIdentityFactory:
             image_url = p.image_url or 'unknown.jpg'
             character_name = p.character_name or 'unknown'
             secret_identities.append(SecretIdentityViewModel(p.name, character_name, image_url, p.catchphrase))
-                
+
         return secret_identities
 
 

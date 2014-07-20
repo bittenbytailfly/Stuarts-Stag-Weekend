@@ -88,7 +88,7 @@ TAKEN_VILLAIN_COUNTER_KEY = 'taken_villains'
 
 class Counter(ndb.Model):
     total = ndb.IntegerProperty(default=0)
-    
+
     @classmethod
     def get_total(cls, name):
         total = memcache.get(name)
@@ -101,17 +101,17 @@ class Counter(ndb.Model):
                 total = 0
             memcache.add(name, total, 60)
         return total
-    
+
     @classmethod
     def increment(cls, name):
         cls._update(name, 1)
         memcache.incr(name)
-            
+
     @classmethod
     def decrement(cls, name):
         cls._update(name, -1)
         memcache.decr(name)
-        
+
     @classmethod
     @ndb.transactional
     def _update(cls, name, i):
